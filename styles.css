@@ -1,0 +1,149 @@
+body {
+    background-image: url(/assets/mosaico-claro.jpg);
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.mb-4 {
+    text-align: center;
+    font-family: "Chewy", system-ui;
+    font-weight: 200;
+    font-size: 4rem;
+    color: rgb(80, 59, 76);
+}
+
+#collage-experiencias {
+    max-height: 550px; /* Ajusta la altura máxima según lo que prefieras */
+    overflow-y: auto; /* Scroll vertical */
+    padding-right: 10px; /* Espacio para el scroll */
+    border: 1px solid #ddd; /* Borde opcional para destacar la sección */
+    background-color: #180018; /* Fondo blanco para contraste */
+    border-radius: 8px; /* Bordes redondeados */
+}
+
+#collage-experiencias .producto {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+}
+
+#collage-experiencias::-webkit-scrollbar {
+    width: 8px;
+}
+
+#collage-experiencias::-webkit-scrollbar-thumb {
+    background-color: #613f57; /* Color del scroll */
+    border-radius: 8px;
+}
+
+#collage-experiencias::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Color del fondo del scroll */
+}
+
+#collage-experiencias .producto img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+#collage-experiencias .producto:hover {
+    transform: scale(1.05);
+    font-size: 0.5rem;
+    line-height: 1.5rem;
+    
+}
+
+.overlay {
+    margin-left: 13px;
+    margin-top: 13px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 90%;
+    height: 90%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1rem;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.producto:hover .overlay {
+    opacity: 1;
+    text-align: center;
+}
+.delete-btn i {
+    font-size: 30%; /* Establecer un tamaño en píxeles */
+  
+}
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #421c3f;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: none;
+    
+}
+
+.producto:hover .delete-btn {
+    display: block;
+}
+
+.btn {
+    background-color: #613f57;
+    color: rgb(252, 222, 248);
+}
+
+/* Ajustes para tabletas (pantallas entre 768px y 992px) */
+@media (max-width: 992px) {
+    .mb-4 {
+        font-size: 2.5rem;
+    }
+    #collage-experiencias {
+        max-height: 400px; /* Reducir altura del collage */
+    }
+}
+
+/* Ajustes para móviles (pantallas menores a 768px) */
+@media (max-width: 768px) {
+    .mb-4 {
+        font-size: 2rem;
+    }
+    #collage-experiencias {
+        max-height: 550px; /* Ajustar la altura del collage */
+        padding-right: 5px;
+    }
+    .col-md-8, .col-md-4 {
+        flex: 0 0 50%; /* Hacer que las columnas ocupen todo el ancho */
+        max-width: 100%;
+    }
+    form {
+        padding: 2rem 1rem;
+    }
+    .producto img {
+        width: 100%; /* Asegurar que las imágenes se adapten */
+        height: auto;
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas (menores a 576px) */
+@media (max-width: 576px) {
+    .mb-4 {
+        font-size: 1.5rem;
+    }
+    form {
+        padding: 1rem; /* Reducir el padding del formulario */
+    }
+}

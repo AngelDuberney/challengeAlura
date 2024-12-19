@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alura Geek</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="mb-4">
+            <input type="text" id="buscador" class="form-control" placeholder="Buscar por nombre o calificación..." />
+        </div>
+        <div class="row">
+            <!-- Sección de experiencias -->
+            <div class="col-lg-8 col-md-12 mb-4">
+                <h2 class="mb-4">Experiencias</h2>
+                <div id="collage-experiencias" class="row g-3">
+                    <!-- Aquí se añadirán las experiencias -->
+                </div>
+            </div>
+            <!-- Sección del formulario -->
+            <div class="col-lg-4 col-md-12">
+                <h2 class="mb-4">Registro de experiencia</h2>
+                <form id="form-experiencia" class="p-4 bg-white shadow rounded" novalidate>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del peludo:</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="imagen" class="form-label">URL de la Imagen:</label>
+                        <input type="url" id="imagen" class="form-control" placeholder="https://example.com/mi-imagen.jpg" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="calificacion" class="form-label">Calificación:</label>
+                        <input type="number" id="calificacion" class="form-control" min="1" max="10" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comentario" class="form-label">Comentario:</label>
+                        <textarea id="comentario" class="form-control" rows="4" maxlength="200" placeholder="¿Qué tal la experiencia? 🐶❤️" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Agregar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
+
+
+.js
+document.addEventListener('DOMContentLoaded', cargarExperiencias);
+
+// Agregar evento para la barra de búsqueda
+document.querySelector('#buscador').addEventListener('input', filtrarExperiencias);
+
+function esURLValida(url) {
+    try {
+        const parsedUrl = new URL(url); // Valida que sea una URL válida
+        return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:'; // Acepta solo URLs http/https
+    } catch {
+        return false;
+    }
+}
+
+document.querySelector('#form-experiencia').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    // Validación de los campos
+    const nombre = document.querySelector('#nombre').value.trim();
+    const calificacion = document.querySelector('#calificacion').value.trim();
+    const comentario = document.querySelector('#comentario').value.trim();
+    const urlImagen = document.querySelector('#imagen').value.trim();
+
+    if (!esURLValida(urlImagen)) {
+        alert('Por favor, ingresa un enlace válido de imagen.');
+        return;
+    }
+
+    if (!nombre || !calificacion || !comentario) {
+        alert('Por favor, completa todos los campos.');
+        return;
+    }
+
+    const experiencia = { nombre, calificacion, comentario, imagen: urlImagen };
+
+    // Validación específica de la calificación
+    if (calificacion < 1 || calificacion > 10) {
+        alert('La calificación debe estar entre 1 y 10.');
+        return;
+    }
+
+    guardarExperiencia(experiencia);
+    limpiarCollage();
+    cargarExperiencias();  // Recargar experiencias con los nuevos datos
+    event.target.reset();   // Limpiar el formulario
+});
+
+function guardarExperiencia(experiencia) {
+    try {
+        const maxExperiencias = 8; // Límite de experiencias almacenadas
+        const experiencias = JSON.parse(localStorage.getItem('experiencias')) || [];
+
+        if (experiencias.length >= maxExperiencias) {
+            experiencias.pop(); // Elimina la más antigua
+        }
+
+        experiencias.unshift(experiencia); // Agrega al principio
+        localStorage.setItem('experiencias', JSON.stringify(experiencias));
+    } catch (error) {
+        console.error('Error al guardar la experiencia:', error);
+    }
+}
+
+function cargarExperiencias() {
+    const experiencias = JSON.parse(localStorage.getItem('experiencias')) || [];
+    const collage = document.querySelector('#collage-experiencias');
+    collage.innerHTML = '';
+
+    if (experiencias.length === 0) {
+        collage.innerHTML = '<p class="text-center">No hay experiencias aún. ¡Sé el primero en agregar una!</p>';
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    experiencias.forEach((experiencia, index) => {
+        const div = document.createElement('div');
+        div.className = 'col-md-4 producto';
+        div.innerHTML = `
+            <img src="${experiencia.imagen}" alt="${experiencia.nombre}">
+            <div class="overlay">
+                <h5>${experiencia.nombre}</h5>
+                <p>Calificación: ${experiencia.calificacion}/10</p>
+                <p>${experiencia.comentario}</p>
+            </div>
+            <button class="delete-btn" onclick="eliminarExperiencia(${index})"><i class="fas fa-trash-alt"></i></button>
+        `;
+        fragment.appendChild(div);
+    });
+
+    collage.appendChild(fragment);
+}
+
+function eliminarExperiencia(index) {
+    try {
+        const experiencias = JSON.parse(localStorage.getItem('experiencias')) || [];
+        experiencias.splice(index, 1); // Elimina la experiencia en el índice dado
+        localStorage.setItem('experiencias', JSON.stringify(experiencias));
+        cargarExperiencias(); // Recargar las experiencias después de la eliminación
+    } catch (error) {
+        console.error('Error al eliminar la experiencia:', error);
+    }
+}
+
+// Función para filtrar las experiencias
+function filtrarExperiencias() {
+    const busqueda = document.querySelector('#buscador').value.trim().toLowerCase();
+    const experiencias = JSON.parse(localStorage.getItem('experiencias')) || [];
+    const collage = document.querySelector('#collage-experiencias');
+    collage.innerHTML = '';
+
+    const experienciasFiltradas = experiencias.filter(experiencia => {
+        const nombreMatch = experiencia.nombre.toLowerCase().includes(busqueda);
+        const calificacionMatch = experiencia.calificacion.toString().includes(busqueda);
+        return nombreMatch || calificacionMatch;
+    });
+
+    if (experienciasFiltradas.length === 0) {
+        collage.innerHTML = '<p class="text-center">No se encontraron experiencias.</p>';
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    experienciasFiltradas.forEach((experiencia, index) => {
+        const div = document.createElement('div');
+        div.className = 'col-md-4 producto';
+        div.innerHTML = `
+            <img src="${experiencia.imagen}" alt="${experiencia.nombre}">
+            <div class="overlay">
+                <h5>${experiencia.nombre}</h5>
+                <p>Calificación: ${experiencia.calificacion}/10</p>
+                <p>${experiencia.comentario}</p>
+            </div>
+            <button class="delete-btn" onclick="eliminarExperiencia(${index})"><i class="fas fa-trash-alt"></i></button>
+        `;
+        fragment.appendChild(div);
+    });
+
+    collage.appendChild(fragment);
+}
+
+// Limpiar el collage cuando se haga la búsqueda
+function limpiarCollage() {
+    document.querySelector('#collage-experiencias').innerHTML = '';
+}
+
+
+.css
+body {
+    background-image: url(/assets/mosaico-claro.jpg);
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.mb-4 {
+    text-align: center;
+    font-family: "Chewy", system-ui;
+    font-weight: 200;
+    font-size: 4rem;
+    color: rgb(80, 59, 76);
+}
+
+#collage-experiencias {
+    max-height: 550px; /* Ajusta la altura máxima según lo que prefieras */
+    overflow-y: auto; /* Scroll vertical */
+    padding-right: 10px; /* Espacio para el scroll */
+    border: 1px solid #ddd; /* Borde opcional para destacar la sección */
+    background-color: #0f000f; /* Fondo blanco para contraste */
+    border-radius: 8px; /* Bordes redondeados */
+}
+
+#collage-experiencias .producto {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+}
+
+#collage-experiencias::-webkit-scrollbar {
+    width: 8px;
+}
+
+#collage-experiencias::-webkit-scrollbar-thumb {
+    background-color: #613f57; /* Color del scroll */
+    border-radius: 8px;
+}
+
+#collage-experiencias::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Color del fondo del scroll */
+}
+
+#collage-experiencias .producto img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+#collage-experiencias .producto:hover {
+    transform: scale(1.05);
+}
+
+.overlay {
+    margin-left: 13px;
+    margin-top: 13px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 90%;
+    height: 90%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1rem;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.producto:hover .overlay {
+    opacity: 1;
+    text-align: center;
+}
+.delete-btn i {
+    font-size: 30%; /* Establecer un tamaño en píxeles */
+  
+}
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #421c3f;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: none;
+    
+}
+
+.producto:hover .delete-btn {
+    display: block;
+}
+
+.btn {
+    background-color: #613f57;
+    color: rgb(252, 222, 248);
+}
+
+/* Ajustes para tabletas (pantallas entre 768px y 992px) */
+@media (max-width: 992px) {
+    .mb-4 {
+        font-size: 2.5rem;
+    }
+    #collage-experiencias {
+        max-height: 400px; /* Reducir altura del collage */
+    }
+}
+
+/* Ajustes para móviles (pantallas menores a 768px) */
+@media (max-width: 768px) {
+    .mb-4 {
+        font-size: 2rem;
+    }
+    #collage-experiencias {
+        max-height: 550px; /* Ajustar la altura del collage */
+        padding-right: 5px;
+    }
+    .col-md-8, .col-md-4 {
+        flex: 0 0 50%; /* Hacer que las columnas ocupen todo el ancho */
+        max-width: 100%;
+    }
+    form {
+        padding: 2rem 1rem;
+    }
+    .producto img {
+        width: 100%; /* Asegurar que las imágenes se adapten */
+        height: auto;
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas (menores a 576px) */
+@media (max-width: 576px) {
+    .mb-4 {
+        font-size: 1.5rem;
+    }
+    form {
+        padding: 1rem; /* Reducir el padding del formulario */
+    }
+}
